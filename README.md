@@ -48,7 +48,6 @@ Recommended project layout:
 │
 ├── generate_channel_txn_multithreaded_progress.py
 ├── .env
-└── requirements.txt
 ```
 
 ---
