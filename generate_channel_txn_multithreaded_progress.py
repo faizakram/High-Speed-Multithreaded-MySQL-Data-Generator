@@ -14,9 +14,19 @@ import math
 import threading
 import mysql.connector
 from faker import Faker
+from pathlib import Path
+from dotenv import load_dotenv
 from concurrent.futures import ThreadPoolExecutor, as_completed
 
-# ---------- ENV ----------
+# ---------- LOAD .ENV ----------
+env_path = Path(__file__).resolve().parent / ".env"
+if env_path.exists():
+    load_dotenv(dotenv_path=env_path)
+    print(f"✅ Loaded environment variables from: {env_path}")
+else:
+    print("⚠️  No .env file found — using system environment variables.")
+
+# ---------- ENV VARIABLES ----------
 MYSQL_HOST = os.getenv("MYSQL_HOST", "localhost")
 MYSQL_PORT = int(os.getenv("MYSQL_PORT", "3306"))
 MYSQL_USER = os.getenv("MYSQL_USER", "root")
@@ -158,7 +168,7 @@ def insert_worker(worker_id: int, start_index: int, end_index: int, total_all_th
             rate = global_inserted / elapsed if elapsed > 0 else 0
             eta = left / rate if rate > 0 else 0
             print(
-                f"🧵 Worker {worker_id} | Inserted: {global_inserted:,}/{total_all_threads:,} "
+                f"🧵 Worker {worker_id:02d} | Inserted: {global_inserted:,}/{total_all_threads:,} "
                 f"({percent:5.2f}%) | Left: {left:,} | "
                 f"Speed: {rate:,.0f} rows/sec | ETA: {eta/60:,.2f} min"
             )
@@ -168,7 +178,7 @@ def insert_worker(worker_id: int, start_index: int, end_index: int, total_all_th
     conn.commit()
     cur.close()
     conn.close()
-    print(f"✅ Worker {worker_id} completed {total:,} rows.")
+    print(f"✅ Worker {worker_id:02d} completed {total:,} rows.")
     return worker_id, total
 
 
@@ -188,7 +198,7 @@ def main():
 
         for future in as_completed(tasks):
             wid, count = future.result()
-            print(f"✅ Worker {wid} finished inserting {count:,} rows")
+            print(f"✅ Worker {wid:02d} finished inserting {count:,} rows")
 
     elapsed = time.time() - t0
     rate = TOTAL_RECORDS / elapsed if elapsed > 0 else 0
